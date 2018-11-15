@@ -176,6 +176,7 @@ exports.handler = skillBuilder
   .addRequestHandlers(
     LatestQuakeIntentHandler,
     WasThatAQuakeIntentHandler,
+    FeltIntentHandler,
     HelpHandler,
     ExitHandler,
     SessionEndedRequestHandler
