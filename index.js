@@ -47,21 +47,24 @@ async function GetRecentQuakeData(mmi=3, location) {
   return quakes[0]["properties"];
 }
 
-function CalculateTimeDifference(time) {
-  var currentMiliseconds = Date.now(); 
-  var oneDate = new Date(time);
+function CalculateTimeDifference(timeUTC) {
+  var currentMiliseconds = Date.now();
+  var oneDate = new Date(timeUTC);
   var oneDateMiliseconds = oneDate.getTime();
   var difference = currentMiliseconds-oneDateMiliseconds;
   return diff = new Date(difference);
 }
 
 function ConvertTimeToSpeech(time) {
+  if (CalculateTimeDifference(time).getHours() === 0) {
+    return `${CalculateTimeDifference(time).getMinutes()} minutes ago`;
+  };
   return `${CalculateTimeDifference(time).getHours()} hours ago`;
 }
 
 function ConvertQuakeToSpeech(quake) {
   var ago = ConvertTimeToSpeech(quake["time"]);
-  return `${ago} at ${quake["locality"]} with a magnitude of ${Math.round(quake["magnitude"]*100)/100}`;
+  return `${ago} at ${quake["locality"]} with a magnitude of ${Math.round(quake["magnitude"]*100)/100} and intensity of ${quake["mmi"]}`;
 }
 
 async function GetLatestNews() {
@@ -91,7 +94,14 @@ const LatestQuakeIntentHandler = {
   },
   async handle(handlerInput) {
     var speechOutput='There wasn\`t any recent earthquakes.';
-    const quake = await GetRecentQuakeData();
+    var quake;
+    if (handlerInput.slots ==! null) {
+      var size = handlerInput.intent.slots.size.value;
+      quake = await GetRecentQuakeData(size);
+    } else
+    {
+    quake = await GetRecentQuakeData(); 
+  };
     if (quake != null) {
       speechOutput=`The last relevant earthquake was ${ConvertQuakeToSpeech(quake)}`;
     }
@@ -108,7 +118,16 @@ const WasThatAQuakeIntentHandler = {
         && request.intent.name === 'WasThatAQuakeIntent');
   },
   async handle(handlerInput) {
-    var speechOutput='No, I don\'t think so. There wasn\`t any recent earthquakes.';
+    var speechOutput='No, I don\'t think so. There weren\`t any recent quakes.';
+    const quake = await GetRecentQuakeData(3); //Look for lower magintude quakes for local quake check
+    const timeDifference = CalculateTimeDifference(quake.time);
+    d('Time difference=',timeDifference);
+    if (timeDifference > 10*60*1000) 
+    {
+      speechOutput = 'Couln\'t find a recent quake. Maybe just a gust of wind (you are in Wellington, after all!)'; }
+      else {
+      speechOutput = 'This quake could be what you felt: There was a quake ' + ConvertQuakeToSpeech(quake);
+    }
     //TODO: no, don't worry
     //TODO: check time less that 0h, 10mins?
     //TODO: YES, there was one few hours ago
