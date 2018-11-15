@@ -4,20 +4,39 @@
 const Alexa = require('ask-sdk');
 const http = require('http');
 
+function SpeechCard(handlerInput, speechOutput) {
+  return handlerInput.responseBuilder
+      .speak(speechOutput)
+      .withSimpleCard(SKILL_NAME, speechOutput)
+      .getResponse();
+}
+
+const httpGet = url => {
+  return new Promise((resolve, reject) => {
+      http.get(url, res => {
+      res.setEncoding('utf8');
+      let body = ''; 
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => resolve(body));
+      }).on('error', reject);
+  });
+};
+
+//
+function GetFirstGeonetData(location) {
+
+}
 
 const LatestQuakeIntentHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
     console.log(`REQUEST: ${JSON.stringify(request)}`);
-    
-    
     console.log(`REQUEST type is: ${request.type}`);
     
-    return request.type === 'LaunchRequest'
-      || (request.type === 'IntentRequest'
+    return request.type === 'LaunchRequest' || (request.type === 'IntentRequest'
         && request.intent.name === 'LatestQuakeIntent');
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     /*
     const factArr = data;
     const factIndex = Math.floor(Math.random() * factArr.length);
@@ -27,14 +46,13 @@ const LatestQuakeIntentHandler = {
 
     // Start API block
     var responseString = '';
-    var speechOutput='';
+    var speechOutput='Not populated';
     console.log('This is before API call');
     
-    var mythis = this;
     // http.get('http://api.geonet.org.nz/volcano/1', (res) => 
-    http.get('http://api.geonet.org.nz/quake?MMI=3', (res) => {
-        console.log('statusCode:', res.statusCode);
-        console.log('headers:', res.headers);
+    /*http.get('http://api.geonet.org.nz/quake?MMI=3', (res) => {
+        //console.log('statusCode:', res.statusCode);
+        //console.log('headers:', res.headers);
 
         //Fetching data
         res.on('data', (d) => { responseString += d; });
@@ -48,15 +66,16 @@ const LatestQuakeIntentHandler = {
             //console.log('What comes after this?')
 
             console.log(`After constructing the speechOutput=${speechOutput}`);
-
-            return handlerInput.responseBuilder
-              .speak(speechOutput)
-              .withSimpleCard(SKILL_NAME, speechOutput)
-              .getResponse();
         });
     }).on('error', (e) => { console.error(e);});
-},
+    */
 
+    const response = await httpGet('http://www.somesite.com');
+    console.log(response);
+
+    speechOutput=response;
+    return SpeechCard(handlerInput,speechOutput);
+  }
 };
 
 const HelpHandler = {
