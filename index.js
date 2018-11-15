@@ -53,7 +53,7 @@ function ConvertTimeToSpeech(time="November 02, 2017 06:00:00") {
 }
 function ConvertQuakeToSpeech(quake) {
   var ago = ConvertTimeToSpeech(quake["time"]);
-  return `The last relevant quake was ${ago} at ${quake["locality"]}`;
+  return `${ago} at ${quake["locality"]} with a magnitude of ${Math.round(quake["magnitude"]*100)/100}`;
 }
 
 const LatestQuakeIntentHandler = {
@@ -70,7 +70,7 @@ const LatestQuakeIntentHandler = {
 
     const quake = await GetRecentQuakeData();
     if (quake != null) {
-      speechOutput=ConvertQuakeToSpeech(quake);
+      speechOutput=`The last relevant quake was ${ConvertQuakeToSpeech(quake)}`;
     }
     return SpeechCard(handlerInput,speechOutput);
   }
