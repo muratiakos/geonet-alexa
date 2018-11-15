@@ -4,6 +4,11 @@
 const Alexa = require('ask-sdk');
 const http = require('http');
 
+const DEBUG = 0;
+
+function d(msg) {
+  if (DEBUG) console.log(msg);
+}
 function SpeechCard(handlerInput, speechOutput) {
   return handlerInput.responseBuilder
       .speak(speechOutput)
@@ -22,55 +27,35 @@ const httpGet = url => {
   });
 };
 
-//
-function GetFirstGeonetData(location) {
-
+async function getVolcano() {
+  return 'http://api.geonet.org.nz/volcano/1';
+}
+async function GetQuakeData(mmi=3) {
+  const responseStr = await httpGet(`http://api.geonet.org.nz/quake?MMI=${mmi}`);
+  d(`Received response:\n${responseStr}`);
+  const response = JSON.parse(responseStr);
+  return response["features"];
+}
+async function GetRecentQuakeData(mmi=3, location) {
+  const quakes = await GetQuakeData(mmi);
+  //TODO: pick-up device location ["locality"]
+  return quakes[0]["properties"];
 }
 
 const LatestQuakeIntentHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
-    console.log(`REQUEST: ${JSON.stringify(request)}`);
-    console.log(`REQUEST type is: ${request.type}`);
+    d(`REQUEST: ${JSON.stringify(request)}`);
+    d(`REQUEST type is: ${request.type}`);
     
     return request.type === 'LaunchRequest' || (request.type === 'IntentRequest'
         && request.intent.name === 'LatestQuakeIntent');
   },
   async handle(handlerInput) {
-    /*
-    const factArr = data;
-    const factIndex = Math.floor(Math.random() * factArr.length);
-    const randomFact = factArr[factIndex];
-    const speechOutput = GET_FACT_MESSAGE + randomFact;
-    */
-
-    // Start API block
     var responseString = '';
     var speechOutput='Not populated';
-    console.log('This is before API call');
-    
-    // http.get('http://api.geonet.org.nz/volcano/1', (res) => 
-    /*http.get('http://api.geonet.org.nz/quake?MMI=3', (res) => {
-        //console.log('statusCode:', res.statusCode);
-        //console.log('headers:', res.headers);
 
-        //Fetching data
-        res.on('data', (d) => { responseString += d; });
-
-        //Finished
-        res.on('end', function(res) {
-            //console.log('Response------------>', responseString);
-            const eqobj=JSON.parse(responseString);
-            speechOutput = eqobj["features"][0]["properties"]["locality"];
-            //console.log('==> API response: ', speechOutput);
-            //console.log('What comes after this?')
-
-            console.log(`After constructing the speechOutput=${speechOutput}`);
-        });
-    }).on('error', (e) => { console.error(e);});
-    */
-
-    const response = await httpGet('http://www.somesite.com');
+    const response = await GetRecentQuakeData();
     console.log(response);
 
     speechOutput=response;
@@ -81,8 +66,7 @@ const LatestQuakeIntentHandler = {
 const HelpHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
-    return request.type === 'IntentRequest'
-      && request.intent.name === 'AMAZON.HelpIntent';
+    return request.type === 'IntentRequest' && request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
