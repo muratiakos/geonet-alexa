@@ -3,6 +3,7 @@
 
 const Alexa = require('ask-sdk');
 const http = require('http');
+const https = require("https");
 
 const DEBUG = 0;
 
@@ -18,7 +19,10 @@ function SpeechCard(handlerInput, speechOutput) {
 
 const httpGet = url => {
   return new Promise((resolve, reject) => {
-      http.get(url, res => {
+      var client = http;
+      if (url.match(/^https/g)) client = https;
+
+      client.get(url, res => {
       res.setEncoding('utf8');
       let body = ''; 
       res.on('data', chunk => body += chunk);
@@ -54,9 +58,27 @@ function CalucalteTimeDifference(time) {
 function ConvertTimeToSpeech(time) {
   return `${CalucalteTimeDifference(time).getHours()} hours ago`;
 }
+
 function ConvertQuakeToSpeech(quake) {
   var ago = ConvertTimeToSpeech(quake["time"]);
   return `${ago} at ${quake["locality"]} with a magnitude of ${Math.round(quake["magnitude"]*100)/100}`;
+}
+
+async function GetLatestNews() {
+  const responseStr = await httpGet(`https://api.geonet.org.nz/news/geonet`);
+  const response = JSON.parse(responseStr);
+  var news = await httpGet(response.feed[0].link);
+  //TODO: apply a proper innerHTML parser
+  news = news.replace(/(\w|-)+=(\\)*("|')[^"^']*("|')/gm,'');
+  news = news.replace(/(&nbps;|\n)/gm,' ');
+
+  //Cut to header and footer
+  news = news.replace(/<!.*<h3>/gm,'');
+  news = news.replace(/Data&nbsp;Policy.*/gm,'');
+  // Clean other tags
+  news = news.replace(/<(!|\/)*(\w+\s*\w*\/*)>/gm,' ');
+  
+  return news;
 }
 
 
@@ -94,6 +116,19 @@ const WasThatAQuakeIntentHandler = {
   }
 };
 
+
+// ----- READ NEWS ----
+const ReadNewsIntentHandler = {
+  canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+    return request.type === 'LaunchRequest' || (request.type === 'IntentRequest'
+        && request.intent.name === 'ReadNewsIntent');
+  },
+  async handle(handlerInput) {
+    var speechOutput=await GetLatestNews();
+    return SpeechCard(handlerInput,speechOutput);
+  }
+};
 
 // ----- REPORT ONE ----
 const FeltIntentHandler = {
@@ -177,6 +212,7 @@ exports.handler = skillBuilder
     LatestQuakeIntentHandler,
     WasThatAQuakeIntentHandler,
     FeltIntentHandler,
+    ReadNewsIntentHandler,
     HelpHandler,
     ExitHandler,
     SessionEndedRequestHandler
