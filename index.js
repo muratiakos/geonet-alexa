@@ -30,6 +30,7 @@ const httpGet = url => {
 async function getVolcano() {
   return 'http://api.geonet.org.nz/volcano/1';
 }
+
 async function GetQuakeData(mmi=3) {
   const responseStr = await httpGet(`http://api.geonet.org.nz/quake?MMI=${mmi}`);
   d(`Received response:\n${responseStr}`);
@@ -42,14 +43,16 @@ async function GetRecentQuakeData(mmi=3, location) {
   return quakes[0]["properties"];
 }
 
-function ConvertTimeToSpeech(time="November 02, 2017 06:00:00") {
+function CalucalteTimeDifference(time) {
   var currentMiliseconds = Date.now(); 
   var oneDate = new Date(time);
   var oneDateMiliseconds = oneDate.getTime();
   var difference = currentMiliseconds-oneDateMiliseconds;
-  var diff = new Date(difference)
+  return diff = new Date(difference);
+}
 
-  return `${diff.getHours()} hours ago`;
+function ConvertTimeToSpeech(time) {
+  return `${CalucalteTimeDifference(time).getHours()} hours ago`;
 }
 function ConvertQuakeToSpeech(quake) {
   var ago = ConvertTimeToSpeech(quake["time"]);
@@ -59,19 +62,30 @@ function ConvertQuakeToSpeech(quake) {
 const LatestQuakeIntentHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
-    d(`REQUEST: ${JSON.stringify(request)}`);
-    d(`REQUEST type is: ${request.type}`);
-    
     return request.type === 'LaunchRequest' || (request.type === 'IntentRequest'
         && request.intent.name === 'LatestQuakeIntent');
   },
   async handle(handlerInput) {
-    var speechOutput='There wasn\`t any recent quakes.';
-
+    var speechOutput='There wasn\`t any recent earthquakes.';
     const quake = await GetRecentQuakeData();
     if (quake != null) {
-      speechOutput=`The last relevant quake was ${ConvertQuakeToSpeech(quake)}`;
+      speechOutput=`The last relevant earthquake was ${ConvertQuakeToSpeech(quake)}`;
     }
+    return SpeechCard(handlerInput,speechOutput);
+  }
+};
+
+const WasThatAQuakeIntentHandler = {
+  canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+    return request.type === 'LaunchRequest' || (request.type === 'IntentRequest'
+        && request.intent.name === 'WasThatAQuakeIntent');
+  },
+  async handle(handlerInput) {
+    var speechOutput='No, There wasn\`t any recent earthquakes.';
+    //TODO: no, don't worry
+    //TODO: check time less that 0h, 10mins?
+    //TODO: YES, there was one few minutes ago
     return SpeechCard(handlerInput,speechOutput);
   }
 };
@@ -79,7 +93,8 @@ const LatestQuakeIntentHandler = {
 const HelpHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
-    return request.type === 'IntentRequest' && request.intent.name === 'AMAZON.HelpIntent';
+    return request.type === 'IntentRequest'
+      && request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
@@ -130,20 +145,16 @@ const ErrorHandler = {
 };
 
 const SKILL_NAME = 'GeoNet assistant';
-const GET_FACT_MESSAGE = 'Here\'s your fact: ';
-const HELP_MESSAGE = 'You can say - if that was an earthquake.';
+const HELP_MESSAGE = 'You can say - if that was an earthquake or when was the last earthquake';
 const HELP_REPROMPT = 'What do you want to know from GeoNet?';
 const STOP_MESSAGE = 'Goodbye!';
-
-const data = [
-  'GeoNet fact'
-];
 
 const skillBuilder = Alexa.SkillBuilders.standard();
 
 exports.handler = skillBuilder
   .addRequestHandlers(
     LatestQuakeIntentHandler,
+    WasThatAQuakeIntentHandler,
     HelpHandler,
     ExitHandler,
     SessionEndedRequestHandler
