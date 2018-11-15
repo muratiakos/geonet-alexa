@@ -59,6 +59,8 @@ function ConvertQuakeToSpeech(quake) {
   return `${ago} at ${quake["locality"]} with a magnitude of ${Math.round(quake["magnitude"]*100)/100}`;
 }
 
+
+// ----- TELL THE LATEST ONE ----
 const LatestQuakeIntentHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
@@ -75,6 +77,8 @@ const LatestQuakeIntentHandler = {
   }
 };
 
+
+// ----- WAS THAT ONE ----
 const WasThatAQuakeIntentHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
@@ -82,10 +86,27 @@ const WasThatAQuakeIntentHandler = {
         && request.intent.name === 'WasThatAQuakeIntent');
   },
   async handle(handlerInput) {
-    var speechOutput='No, There wasn\`t any recent earthquakes.';
+    var speechOutput='No, I don\'t think so. There wasn\`t any recent earthquakes.';
     //TODO: no, don't worry
     //TODO: check time less that 0h, 10mins?
-    //TODO: YES, there was one few minutes ago
+    //TODO: YES, there was one few hours ago
+    return SpeechCard(handlerInput,speechOutput);
+  }
+};
+
+
+// ----- REPORT ONE ----
+const FeltIntentHandler = {
+  canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+    return request.type === 'LaunchRequest' || (request.type === 'IntentRequest'
+        && request.intent.name === 'FeltIntent');
+  },
+  async handle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+    var size = request.intent.slots.size.value;
+    var city = "Wellington"; //TODO: detect nearest city
+    var speechOutput=`Ok, I am reporting a ${size} earthquake for ${city}.`;
     return SpeechCard(handlerInput,speechOutput);
   }
 };
