@@ -13,4 +13,7 @@ slss invoke local -f geonet --path ./test/fixtures/LatestQuakeIntent.json
 
 ## Was that A???
 slss invoke local -f geonet --path ./test/fixtures/WasThatAQuakeIntent.json
+
+## Read news
+slss invoke local -f geonet --path ./test/fixtures/ReadNewsIntent.json
 ```
