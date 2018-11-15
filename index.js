@@ -42,6 +42,20 @@ async function GetRecentQuakeData(mmi=3, location) {
   return quakes[0]["properties"];
 }
 
+function ConvertTimeToSpeech(time="November 02, 2017 06:00:00") {
+  var currentMiliseconds = Date.now(); 
+  var oneDate = new Date(time);
+  var oneDateMiliseconds = oneDate.getTime();
+  var difference = currentMiliseconds-oneDateMiliseconds;
+  var diff = new Date(difference)
+
+  return `${diff.getHours()} hours ago`;
+}
+function ConvertQuakeToSpeech(quake) {
+  var ago = ConvertTimeToSpeech(quake["time"]);
+  return `The last relevant quake was ${ago} at ${quake["locality"]}`;
+}
+
 const LatestQuakeIntentHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
@@ -52,13 +66,12 @@ const LatestQuakeIntentHandler = {
         && request.intent.name === 'LatestQuakeIntent');
   },
   async handle(handlerInput) {
-    var responseString = '';
-    var speechOutput='Not populated';
+    var speechOutput='There wasn\`t any recent quakes.';
 
-    const response = await GetRecentQuakeData();
-    console.log(response);
-
-    speechOutput=response;
+    const quake = await GetRecentQuakeData();
+    if (quake != null) {
+      speechOutput=ConvertQuakeToSpeech(quake);
+    }
     return SpeechCard(handlerInput,speechOutput);
   }
 };
