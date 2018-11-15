@@ -1,0 +1,13 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - env
+      - env | grep AWS
+      - npm install -g serverless
+      # - serverless plugin install --name serverless-pseudo-parameters
+  pre_build:
+  build:
+    commands:
+      - serverless deploy --region us-east-1 --stage dev -v
