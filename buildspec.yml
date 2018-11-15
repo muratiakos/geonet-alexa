@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - env
+      - env | grep AWS
+      - npm install -g serverless
+      - npm install
+      # - serverless plugin install --name serverless-pseudo-parameters
+  pre_build:
+    commands:
+      - serverless invoke local -f geonet --path ./test/fixtures/FeltIntent.json
+      - serverless invoke local -f geonet --path ./test/fixtures/LatestQuakeIntent.json
+      - serverless invoke local -f geonet --path ./test/fixtures/ReadNewsIntent.json
+      - serverless invoke local -f geonet --path ./test/fixtures/WasThatAQuakeIntent.json
+  build:
+    commands:
+      - serverless deploy --region us-east-1 --stage prod -v
