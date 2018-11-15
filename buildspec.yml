@@ -16,4 +16,4 @@ phases:
       - serverless invoke local -f geonet --path ./test/fixtures/WasThatAQuakeIntent.json
   build:
     commands:
-      - serverless deploy --region us-east-1 --stage dev -v
+      - serverless deploy --region us-east-1 --stage prod -v
