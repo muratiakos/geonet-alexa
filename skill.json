@@ -1,0 +1,230 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "geo",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": [
+                        "fallback"
+                    ]
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": [
+                        "hello"
+                    ]
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": [
+                        "quit"
+                    ]
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "LatestQuakeIntent",
+                    "slots": [
+                        {
+                            "name": "size",
+                            "type": "magnitudeType"
+                        }
+                    ],
+                    "samples": [
+                        "last eartquake",
+                        "recent earthquake",
+                        "last quake",
+                        "where was the recent earthquake",
+                        "where was the last earthquake",
+                        "quake",
+                        "earthquake",
+                        "latest quake",
+                        "When was a quake",
+                        "When was the latest earthquake"
+                    ]
+                },
+                {
+                    "name": "WasThatAQuakeIntent",
+                    "slots": [],
+                    "samples": [
+                        "is an earthquake going on",
+                        "is an earthquake happening",
+                        "was it an earthquake",
+                        "is it a quake happening",
+                        "Is it an earthquake",
+                        "Was that an earthquake",
+                        "Was that a quake"
+                    ]
+                },
+                {
+                    "name": "FeltIntent",
+                    "slots": [
+                        {
+                            "name": "size",
+                            "type": "magnitudeType",
+                            "samples": [
+                                "{size} shaking",
+                                "{size} one",
+                                "{size}",
+                                "really {size}",
+                                "pretty {size}",
+                                "quite {size}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "feeling it",
+                        "I am feeling one",
+                        "I felt one",
+                        "felt a really {size} one",
+                        "I am sure it is shaking",
+                        "feel a {size} earthquake",
+                        "felt {size} shaking",
+                        "I felt a {size} one"
+                    ]
+                },
+                {
+                    "name": "ReadNewsIntent",
+                    "slots": [],
+                    "samples": [
+                        "blog",
+                        "news",
+                        "tell recent news",
+                        "tell news",
+                        "read blog",
+                        "read latest news",
+                        "read news"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "magnitudeType",
+                    "values": [
+                        {
+                            "id": "5",
+                            "name": {
+                                "value": "severe",
+                                "synonyms": [
+                                    "fucking large",
+                                    "freeking large",
+                                    "huge"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "3",
+                            "name": {
+                                "value": "moderate",
+                                "synonyms": [
+                                    "decent",
+                                    "OK"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "4",
+                            "name": {
+                                "value": "strong",
+                                "synonyms": [
+                                    "freeky",
+                                    "big",
+                                    "large"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "2",
+                            "name": {
+                                "value": "light",
+                                "synonyms": [
+                                    "fine",
+                                    "medium"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "1",
+                            "name": {
+                                "value": "weak",
+                                "synonyms": [
+                                    "wee",
+                                    "some",
+                                    "tiny",
+                                    "small"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "FeltIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "size",
+                            "type": "magnitudeType",
+                            "confirmationRequired": true,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "confirmation": "Confirm.Slot.185941917573.1225906448599",
+                                "elicitation": "Elicit.Slot.378446157946.847783513321"
+                            },
+                            "validations": [
+                                {
+                                    "type": "hasEntityResolutionMatch",
+                                    "prompt": "Slot.Validation.592840164044.1216668427406.1353025146527"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.378446157946.847783513321",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Was it a weak, light or medium one?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "How strong was it?"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.592840164044.1216668427406.1353025146527",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "How strong was it, Was it a weak, light or medium one?"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Slot.185941917573.1225906448599",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Could you confirm again that this was a {size} earthquake?"
+                    }
+                ]
+            }
+        ]
+    }
+}
