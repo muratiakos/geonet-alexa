@@ -47,7 +47,7 @@ async function GetRecentQuakeData(mmi=3, location) {
   return quakes[0]["properties"];
 }
 
-function CalucalteTimeDifference(time) {
+function CalculateTimeDifference(time) {
   var currentMiliseconds = Date.now(); 
   var oneDate = new Date(time);
   var oneDateMiliseconds = oneDate.getTime();
@@ -56,7 +56,7 @@ function CalucalteTimeDifference(time) {
 }
 
 function ConvertTimeToSpeech(time) {
-  return `${CalucalteTimeDifference(time).getHours()} hours ago`;
+  return `${CalculateTimeDifference(time).getHours()} hours ago`;
 }
 
 function ConvertQuakeToSpeech(quake) {
