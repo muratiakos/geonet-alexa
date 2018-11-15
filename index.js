@@ -94,18 +94,22 @@ const LatestQuakeIntentHandler = {
         && request.intent.name === 'LatestQuakeIntent');
   },
   async handle(handlerInput) {
-    var speechOutput='There wasn\`t any recent earthquakes.';
+    var speechOutput='There weren`t any recent earthquakes.';
     var quake;
-    if (handlerInput.slots ==! null) {
+    if (handlerInput.slots != null) {
       var size = handlerInput.intent.slots.size.value;
       quake = await GetRecentQuakeData(size);
     } else
     {
     quake = await GetRecentQuakeData(); 
   };
-    if (quake != null) {
-      speechOutput=`The last relevant earthquake was ${ConvertQuakeToSpeech(quake)}`;
-    }
+  //  if (quake != null) {
+  //    if (handlerInput.intent.slots.size.value != null) {
+  //    speechOutput=`The last intensity 'handlerInput.intent.slots.size.value+' relevant earthquake was ${ConvertQuakeToSpeech(quake)}`;
+  //  }
+  //    else  {
+        speechOutput=`The last relevant earthquake was ${ConvertQuakeToSpeech(quake)}`; 
+  //   }
     return SpeechCard(handlerInput,speechOutput);
   }
 };
