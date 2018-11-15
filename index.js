@@ -56,9 +56,10 @@ function CalculateTimeDifference(timeUTC) {
 }
 
 function ConvertTimeToSpeech(time) {
-  if (CalculateTimeDifference(time).getHours() === 0) {
+  if (CalculateTimeDifference(time).getHours() < 2) {
     return `${CalculateTimeDifference(time).getMinutes()} minutes ago`;
   };
+  
   return `${CalculateTimeDifference(time).getHours()} hours ago`;
 }
 
