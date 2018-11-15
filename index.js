@@ -8,7 +8,7 @@ const http = require('http');
 const LatestQuakeIntentHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
-    console.log(`REQUEST: ${request}`);
+    console.log(`REQUEST: ${JSON.stringify(request)}`);
     
     
     console.log(`REQUEST type is: ${request.type}`);
@@ -41,21 +41,20 @@ const LatestQuakeIntentHandler = {
 
         //Finished
         res.on('end', function(res) {
-            console.log('Response------------>', responseString);
+            //console.log('Response------------>', responseString);
             const eqobj=JSON.parse(responseString);
             speechOutput = eqobj["features"][0]["properties"]["locality"];
-            console.log('==> API response: ', speechOutput);
-            console.log('What comes after this?')
+            //console.log('==> API response: ', speechOutput);
+            //console.log('What comes after this?')
+
+            console.log(`After constructing the speechOutput=${speechOutput}`);
+
+            return handlerInput.responseBuilder
+              .speak(speechOutput)
+              .withSimpleCard(SKILL_NAME, speechOutput)
+              .getResponse();
         });
     }).on('error', (e) => { console.error(e);});
-
-    console.log(`After constructing the speechOutput=${speechOutput}`);
-
-    return handlerInput.responseBuilder
-      .speak(speechOutput)
-      .withSimpleCard(SKILL_NAME, speechOutput)
-      .getResponse();
-
 },
 
 };
